@@ -31,9 +31,12 @@ export class AppComponent implements OnInit {
   login(){
     this.af.auth.login({
       provider:AuthProviders.Facebook,
-      method:AuthMethods.Popup
-    }).then(authState=>{
-      console.log("Afetr login", authState);
+      method:AuthMethods.Popup,
+      scope:['user_birthday','user_friends']
+    }).then((authState: any)=>{
+      this.af.database.object('/users/' + authState.uid).update({
+        accessToken:authState.facebook.accessToken
+      })
     });
   }
 
