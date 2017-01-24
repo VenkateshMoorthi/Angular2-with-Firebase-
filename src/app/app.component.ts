@@ -8,46 +8,39 @@ import { Http } from '@angular/http';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-   displayName;
-   displayURL;
+   error;
 
   constructor(private af: AngularFire, private http:Http){ 
   }
  
   ngOnInit() {
     this.af.auth.subscribe(authState=>{
-      if(!authState){
-        this.displayName=null;
-        this.displayURL=null;
-        return;
-      }
+    });
+  }
 
-      let userRef = this.af.database.object('/users/' + authState.uid);
-      userRef.subscribe(user=>{
-          let url = `https://graph.facebook.com/v2.8/${authState.facebook.uid}?fields=first_name,last_name&access_token=${user.accessToken}`;
-          this.http.get(url).subscribe(response=>{
-            let user = response.json();
-            userRef.update({
-              firstName:user.first_name,
-              lastName:user.last_name
-            });
-          });
-      });
-
-      this.displayName=authState.auth.displayName;
-      this.displayURL=authState.auth.photoURL
-    })
+  register(){
+    this.af.auth.createUser({
+      email:"venkateshmoorthi11@gmail.com",
+      password:"Martial@8"
+    }).then(authState=>{
+      authState.auth.sendEmailVerification();
+    }).catch(error=>{
+      console.log("Register-error",error);
+    });
   }
 
   login(){
     this.af.auth.login({
-      provider:AuthProviders.Facebook,
-      method:AuthMethods.Popup,
-      scope:['user_birthday','user_friends']
-    }).then((authState: any)=>{
-      this.af.database.object('/users/' + authState.uid).update({
-        accessToken:authState.facebook.accessToken
-      })
+      email:'venkateshmoorthi11@gmail.com',
+      password:'Martial8'
+    },{
+      method:AuthMethods.Password,
+      provider:AuthProviders.Password
+    })
+    .then(authState=>{
+      console.log("Login-then")
+    }).catch(error=>{
+      this.error=error;
     });
   }
 
