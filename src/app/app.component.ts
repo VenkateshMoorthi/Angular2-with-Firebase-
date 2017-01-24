@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFire, FirebaseListObservable } from 'angularfire2';
-import 'rxjs/Rx';
+import { AngularFire, AuthProviders, AuthMethods } from 'angularfire2';
 
 
 import { Observable } from 'rxjs/Observable';
@@ -10,40 +9,35 @@ import { Observable } from 'rxjs/Observable';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
-  cuisines: FirebaseListObservable<any[]>;
-  restaurants: Observable<any[]>;
-  exists;
+export class AppComponent implements OnInit {
+   displayName;
+   displayURL;
+
   constructor(private af: AngularFire){ 
   }
  
   ngOnInit() {
-    this.cuisines = this.af.database.list('/cuisines',{
-      query:{
-        orderByValue:true,
-        equalTo:"Italian"
+    this.af.auth.subscribe(authState=>{
+      if(!authState){
+        this.displayName=null;
+        this.displayURL=null;
+        return;
       }
-    });
-
-
-    this.restaurants = this.af.database.list('/restaurants',{
-      query:{
-        orderByChild:'rating',
-        equalTo: 5
-      }
-    });
-
-    this.af.database.list('/restaurants').push({ name:''})
-    .then(x=>{
-      let restaurant = { name :" My New Restaurant"};
-
-      let update={};
-      update['restaurants/' + x.key] = { name:'My New Restaurant'};
-      update['restaurants-by-city/camberwell/' + x.key] = restaurant;
-
-      this.af.database.object('/').update(update);
+      this.displayName=authState.auth.displayName;
+      this.displayURL=authState.auth.photoURL
     })
-    
+  }
 
+  login(){
+    this.af.auth.login({
+      provider:AuthProviders.Facebook,
+      method:AuthMethods.Popup
+    }).then(authState=>{
+      console.log("Afetr login", authState);
+    });
+  }
+
+  logout(){
+    this.af.auth.logout();
   }
 }
