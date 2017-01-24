@@ -13,23 +13,19 @@ import { Observable } from 'rxjs/Observable';
 export class AppComponent {
   cuisines: FirebaseListObservable<any[]>;
   restaurants: Observable<any[]>;
-
+  exists;
   constructor(private af: AngularFire){ 
   }
  
   ngOnInit() {
     this.cuisines = this.af.database.list('/cuisines');
-    this.restaurants = this.af.database.list('/restaurants').
-      map(restaurants => {
-      console.log ("Before Map",restaurants);
-      restaurants.map(restaurant=>{
-        restaurant.featureTypes=[];
-        for(var r in restaurant.features)
-          restaurant.featureTypes.push(this.af.database.object('/features/'+ r ))
- 
-      });
-      console.log("After Map",restaurants);
-      return restaurants;
-    })
+    this.restaurants = this.af.database.list('/restaurants');
+
+     this.exists=this.af.database.object('/restaurants/1/features/1');
+     this.exists.take(1).subscribe(x=>{
+       if(x && x.$value) console.log("Exists");
+       else console.log("Not Exists");
+     })
+
   }
 }
