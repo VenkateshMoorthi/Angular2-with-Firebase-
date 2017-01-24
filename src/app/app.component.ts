@@ -23,7 +23,10 @@ export class AppComponent {
       map(restaurants => {
       console.log ("Before Map",restaurants);
       restaurants.map(restaurant=>{
-        restaurant.cuisineType=this.af.database.object('/cuisines/'+ restaurant.cuisine);
+        restaurant.featureTypes=[];
+        for(var r in restaurant.features)
+          restaurant.featureTypes.push(this.af.database.object('/features/'+ r ))
+ 
       });
       console.log("After Map",restaurants);
       return restaurants;
