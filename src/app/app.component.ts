@@ -18,14 +18,21 @@ export class AppComponent {
   }
  
   ngOnInit() {
-    this.cuisines = this.af.database.list('/cuisines');
-    this.restaurants = this.af.database.list('/restaurants');
+    this.cuisines = this.af.database.list('/cuisines',{
+      query:{
+        orderByValue:true
+      }
+    });
 
-     this.exists=this.af.database.object('/restaurants/1/features/1');
-     this.exists.take(1).subscribe(x=>{
-       if(x && x.$value) console.log("Exists");
-       else console.log("Not Exists");
-     })
+
+    this.restaurants = this.af.database.list('/restaurants',{
+      query:{
+        orderByChild:'address/city'
+      }
+    });
+
+    
+    
 
   }
 }
